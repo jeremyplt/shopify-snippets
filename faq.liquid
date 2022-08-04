@@ -1,0 +1,236 @@
+<style>
+.faq-item {
+    max-width: 800px;
+    width: -webkit-fill-available;
+    background-color: #f9f9f9;
+    border-radius: 3px;
+    padding: 12px 20px;
+    margin-bottom: 15px;
+}
+
+@keyframes changeContent {
+    0% {
+        transform: rotate(0deg);
+    }
+    50% {
+        transform: rotate(90deg);
+    }
+    100% {
+        content: "\2d";
+        transform: rotate(180deg);
+    }
+}
+  
+@-webkit-keyframes changeContent {
+    0% {
+      -webkit-transform: rotate(0deg);
+    }
+    50% {
+      -webkit-transform: rotate(90deg);
+    }
+    100% {
+      -webkit-content: "\2d";
+      -webkit-transform: rotate(180deg);
+    }
+}
+  
+@-webkit-keyframes changeContentBack {
+    0% {
+      -webkit-transform: rotate(0deg);
+    }
+    50% {
+      -webkit-transform: rotate(90deg);
+    }
+    100% {
+      -webkit-content: "\2b";
+      -webkit-transform: rotate(180deg);
+    }
+}
+  
+@keyframes changeContentBack {
+    0% {
+      -webkit-transform: rotate(0deg);
+    }
+    50% {
+      -webkit-transform: rotate(90deg);
+    }
+    100% {
+      -webkit-content: "\2b";
+      -webkit-transform: rotate(180deg);
+    }
+}
+
+.faq-title h2, .faq-title-reduced {
+    font-size: 24px;
+    margin: 15px 0px;
+    font-weight: bold;
+}
+
+.faq-title-reduced {
+  display: none;
+}
+
+.faq-item h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: normal;
+    display: flex;
+    align-items: center;
+}
+
+.faq-question {
+  display: flex;
+  letter-spacing: -.01rem;
+  align-items: center;
+  font-size: 18px !important;
+}
+
+.faq-collapsible {
+    cursor: pointer;
+    transition: margin .2s;
+}
+
+.faq-collapsible[active=true] {
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.product-info-container .faq-collapsible[active=true]{
+  margin-top: 0;
+}
+
+.faq-collapsible::before {
+    font-size: 22px;
+    margin-right: 16px;
+    content: '\2b';
+    display: inline-block;
+    animation-fill-mode: forwards;
+    animation: changeContentBack .3s linear .01s forwards;
+    -webkit-animation-fill-mode: forwards;
+    -webkit-animation: changeContentBack .3s linear .01s forwards;
+}
+
+.faq-collapsible[active=true]::before {
+    font-weight: normal;
+    animation-fill-mode: forwards;
+    animation: changeContent .3s linear .01s forwards;
+    -webkit-animation-fill-mode: forwards;
+    -webkit-animation: changeContent .3s linear .01s forwards;
+    content: "\2d";
+    color: #4f00a4;
+}
+
+.faq-answer {
+    height: 0;
+    overflow: hidden;
+    transition: height .3s;
+    line-height: 1.5;
+    font-weight: 400;
+    font-size: 1.2rem;
+    color: #636366;
+    margin: 0 25px;
+}
+
+@media screen and (max-width: 419px){
+  .faq-answer {
+    margin: 0;
+  }
+}
+
+  .faq-answer p a {
+    color: var(--color-primary);
+  }
+
+  .page-title {
+    margin-bottom: 0;
+  }
+
+  .faq-item .btn-label {
+    padding-top: 0;
+  }
+</style>
+
+
+<div class="faq-title"><h2>{{ section.settings.faq_title }}</h2></div>
+<div class="faq-title-reduced">FAQ</div>
+<div class="product-info-divider"></div>
+
+
+<div class="questions-container">
+
+{%- for block in section.blocks -%}
+<div class="faq-item">
+  <h3 class="faq-question faq-collapsible" active="false" id="question-{{ block.id }}">
+    <span class="btn-label">{{ block.settings.faq_question }}</span>
+  </h3>
+  <div class="faq-answer">
+    {{ block.settings.faq_answer }}
+  </div>
+</div>
+{%- endfor -%}
+</div>
+
+<script>
+// FAQ COLLAPSIBLE //
+
+const faqQuestions = document.querySelectorAll(".faq-collapsible");
+
+faqQuestions.forEach(question => {
+  question.addEventListener('click', function() {
+    const faqStyle = document.querySelector(`#faq-style-${this.id}`)
+    const customFaqStyle = `<style id="faq-style-${this.id}">
+      #${this.id} + .faq-answer {
+        height:${this.nextElementSibling.scrollHeight}px;
+      }
+    </style>`
+    if (this.getAttribute('active') === 'true'){
+      this.setAttribute('active', 'false');
+      if (faqStyle)
+        faqStyle.remove()
+    } else {
+      if (!faqStyle)
+        document.head.insertAdjacentHTML('afterbegin', customFaqStyle);
+      this.setAttribute('active', 'true');
+    }
+  });
+});
+</script>
+
+
+{% schema %}
+{
+  "name": "FAQ",
+  "max_blocks": 16,
+  "class": "section page-width page-width--narrow faq-container",
+  "settings": [
+      {
+          "label": "FAQ Title",
+          "id": "faq_title",
+          "type": "text"
+      }
+  ],
+  "blocks": [
+      {
+          "name": "Question & Answer",
+          "type": "question-answer",
+          "settings": [
+              {
+                  "label": "Question",
+                  "id": "faq_question",
+                  "type": "text"
+              },
+              {
+                  "label": "Answer",
+                  "id": "faq_answer",
+                  "type": "richtext"
+              }
+          ]
+      }
+  ],
+  "presets": [
+      {
+          "name": "FAQ"
+      }
+  ]
+}
+{% endschema %}
